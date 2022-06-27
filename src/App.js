@@ -1,8 +1,8 @@
-import logo from './logo.svg';
+// import logo from './logo.svg';
 import './App.css';
-import React,{useState, useEffect} from 'react';
-import { StyleSheet, Text, View, SafeAreaView, SectionList, StatusBar } from "react-native";
-import { Button, CheckBox, FlatList } from 'react-native-web';
+import React,{useState} from 'react';
+import { StyleSheet, Text } from "react-native";
+// import { Button, CheckBox, FlatList } from 'react-native-web';
 
 
 
@@ -45,11 +45,13 @@ const handleSubmit = (event) =>{
 const handleCheckBox = (e, item_title) => {
   var checked_status = e.target.checked;
   console.log(checked_status)
+  var newData;
+  var oldData;
   if (checked_status){
     var parent = e.target.parentNode.parentNode;
     console.log(parent);
-    var newData = Data.filter( data => data.title !== item_title );
-    var [oldData] = Data.filter( data => data.title === item_title );
+    newData = Data.filter( data => data.title !== item_title );
+    [oldData] = Data.filter( data => data.title === item_title );
 
     oldData.isChecked = true;
     console.log(oldData)
@@ -59,10 +61,8 @@ const handleCheckBox = (e, item_title) => {
     console.log(completedDataList)
   }else{
     console.log('Some thing change !! Unexprected')
-    var parent = e.target.parentNode.parentNode;
-    console.log(parent);
-    var newData = completedDataList.filter( data => data.title !== item_title );
-    var [oldData] = completedDataList.filter( data => data.title === item_title );
+    newData = completedDataList.filter( data => data.title !== item_title );
+    [oldData] = completedDataList.filter( data => data.title === item_title );
 
     oldData.isChecked = checked_status;
     
@@ -73,9 +73,6 @@ const handleCheckBox = (e, item_title) => {
 
 }
 
-const RenderItem = ({ item }) => (
-    <Item item={item} />
-  );
 
   return(
     <div className='App' >
