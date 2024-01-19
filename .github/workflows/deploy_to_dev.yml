@@ -1,1 +1,12 @@
 name: Deploy your branch to dev
+on:
+  workflow_dispatch:
+jobs:
+  hello:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Dump github events and other vars
+        run: echo '${{ toJSON(github.event) }}' && echo '${{ toJSON(github.secrests) }}'
+        shell: bash
+      
