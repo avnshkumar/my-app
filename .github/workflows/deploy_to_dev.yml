@@ -1,6 +1,12 @@
 name: Deploy your branch to dev
 on:
   workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to run the worflow on'
+        required: true
+        default: master
+        
 jobs:
   hello:
     runs-on: ubuntu-latest
