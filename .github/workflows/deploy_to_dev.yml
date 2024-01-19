@@ -13,6 +13,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Dump github events and other vars
-        run: echo '${{ toJSON(github.event) }}' && echo '${{ toJSON(github.secrests) }}'
+        run: echo '${{ toJSON(github.event.inputs) }}' && echo '${{ toJSON(github.ref_name) }}' && echo '${{ toJSON(github.head_ref) }}'
         shell: bash
       
