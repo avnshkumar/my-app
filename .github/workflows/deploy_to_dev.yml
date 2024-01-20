@@ -2,10 +2,17 @@ name: Deploy your branch to dev
 on:
   workflow_dispatch:
     inputs:
-      branch:
-        description: 'Branch to run the worflow on'
+      environment:
+        description: 'Deploy on which enviroment'
+        type: choice
         required: true
-        default: master
+        default: dev
+        options:
+          - dev
+          - dev1
+          - dev2
+          - dev3
+          - dev4
         
 jobs:
   hello:
