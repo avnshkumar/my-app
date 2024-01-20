@@ -20,7 +20,8 @@ defaults:
   run:
     shell: bash
     working-directory: ./.github
-        
+env:
+  AWS_REGION: us-east-1     
         
 jobs:
   hello:
