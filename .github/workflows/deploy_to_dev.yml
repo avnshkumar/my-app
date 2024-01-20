@@ -24,7 +24,7 @@ defaults:
 env:
   AWS_REGION: us-east-1
   ENV: ${{ github.events.inputs.enviroment}}
-  LAMBDA_FUNCTION_NAME: ${{ $ENV == 'dev' && 'dev-consent-backend' || $ENV == 'dev1' && 'dev1-consent-backend' || $ENV == 'dev2' && 'copilot-dev2-consent-backend' || $ENV == 'dev3' && 'copilot-dev3-consent-backend' || $ENV == 'dev4' && 'copilot-dev4-consent-backend' }}
+  LAMBDA_FUNCTION_NAME: ${{ env.ENV == 'dev' && 'dev-consent-backend' || env.ENV == 'dev1' && 'dev1-consent-backend' || env.ENV == 'dev2' && 'copilot-dev2-consent-backend' || env.ENV == 'dev3' && 'copilot-dev3-consent-backend' || env.ENV == 'dev4' && 'copilot-dev4-consent-backend' }}
 
 jobs:
   hello:
