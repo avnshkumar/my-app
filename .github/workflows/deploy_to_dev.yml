@@ -31,3 +31,11 @@ jobs:
         run: echo '${{ toJSON(github.event.inputs) }}' && echo '${{ toJSON(github.ref_name) }}' && echo '${{ toJSON(github.head_ref) }}'
       - name: Display workflow file
         run: cat workflows/deploy_to_dev.yml
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Check AWS version
+        run: aws --version
