@@ -49,17 +49,20 @@ jobs:
       #   run: zip -r updated_lambda_function.zip node/dev-consent-backend/*
       - name: Get Lambda function name
         run: |
-            if [ \${ENV} == "dev" ]; then
+          if [[ "${{ github.event.inputs.environment }}" == "dev" ]]; then
             echo "LAMBDA_FUNCTION_NAME=dev-consent-backend" >> $GITHUB_ENV
-            elif [ \${ENV} == "dev1" ]; then
+          elif [[ "${{ github.event.inputs.environment }}" == "dev1" ]]; then
             echo "LAMBDA_FUNCTION_NAME=dev1-consent-backend" >> $GITHUB_ENV
-            elif [ \${ENV} == "dev2" ]; then
+          elif [[ "${{ github.event.inputs.environment }}" == "dev2" ]]; then
             echo "LAMBDA_FUNCTION_NAME=copilot-dev2-consent-backend" >> $GITHUB_ENV
-            elif [ \${ENV} == "dev3" ]; then
+          elif [[ "${{ github.event.inputs.environment }}" == "dev3" ]]; then
             echo "LAMBDA_FUNCTION_NAME=copilot-dev3-consent-backend" >> $GITHUB_ENV
-            elif [ \${ENV} == "dev4" ]; then
+          elif [[ "${{ github.event.inputs.environment }}" == "dev4" ]]; then
             echo "LAMBDA_FUNCTION_NAME=copilot-dev4-consent-backend" >> $GITHUB_ENV
-            fi
+          else
+            echo "Unknown Environment"
+            exit 1
+          fi
       - name: Deploy to Lambda
         # run: aws lambda update-function-code --function-name $LAMBDA_FUNCTION_NAME --zip-file fileb://updated_lambda_function.zip
         run: echo $LAMBDA_FUNCTION_NAME 123
