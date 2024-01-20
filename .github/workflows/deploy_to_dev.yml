@@ -21,7 +21,15 @@ defaults:
     shell: bash
     working-directory: ./.github
 env:
-  AWS_REGION: us-east-1     
+  AWS_REGION: us-east-1
+  ENV: ${{ github.events.inputs.enviroment}}
+  LAMBDA_FUNCTION_NAME: ${{ \
+        $ENV == 'dev' && 'dev-consent-backend' || \
+        $ENV == 'dev1' && 'dev1-consent-backend' || \
+        $ENV == 'dev2' && 'copilot-dev2-consent-backend || \
+        $ENV == 'dev3' && 'copilot-dev3-consent-backend || \
+        $ENV == 'dev4' && 'copilot-dev4-consent-backend || \
+        }}
         
 jobs:
   hello:
@@ -40,3 +48,10 @@ jobs:
       #     aws-region: ${{ env.AWS_REGION }}
       - name: Check AWS version
         run: aws --version
+
+      # - name: Zip Lambda Function
+      #   run: zip -r updated_lambda_function.zip node/dev-consent-backend/*
+      
+      - name: Deploy to Lambda
+        # run: aws lambda update-function-code --function-name $LAMBDA_FUNCTION_NAME --zip-file fileb://updated_lambda_function.zip
+        run: echo ''$LAMBDA_FUNCTION_NAME'
