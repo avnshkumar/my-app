@@ -20,22 +20,17 @@ defaults:
   run:
     shell: bash
     working-directory: ./.github
+
 env:
   AWS_REGION: us-east-1
   ENV: ${{ github.events.inputs.enviroment}}
-  LAMBDA_FUNCTION_NAME: ${{ \
-        $ENV == 'dev' && 'dev-consent-backend' || \
-        $ENV == 'dev1' && 'dev1-consent-backend' || \
-        $ENV == 'dev2' && 'copilot-dev2-consent-backend || \
-        $ENV == 'dev3' && 'copilot-dev3-consent-backend || \
-        $ENV == 'dev4' && 'copilot-dev4-consent-backend || \
-        }}
+  LAMBDA_FUNCTION_NAME: "dev-consent-backend"
         
 jobs:
   hello:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Dump github events and other vars
         run: echo '${{ toJSON(github.event.inputs) }}' && echo '${{ toJSON(github.ref_name) }}' && echo '${{ toJSON(github.head_ref) }}'
       - name: Display workflow file
@@ -51,7 +46,19 @@ jobs:
 
       # - name: Zip Lambda Function
       #   run: zip -r updated_lambda_function.zip node/dev-consent-backend/*
-      
+      - name: Get Lambda function name
+        run: |
+          if [ $ENV == 'dev' ]; then
+            echo "dev-consent-backend" >> "$LAMBDA_FUNCTION_NAME"
+          elif [ $ENV == 'dev1' ]; then
+            echo "dev1-consent-backend" >> "$LAMBDA_FUNCTION_NAME"
+          elif [ $ENV == 'dev2' ]; then
+            echo "copilot-dev2-consent-backend " >> "$LAMBDA_FUNCTION_NAME"
+          elif [ $ENV == 'dev3' ]; then
+            echo "copilot-dev3-consent-backend " >> "$LAMBDA_FUNCTION_NAME"
+          elif [ $ENV == 'dev4' ]; then
+            echo "copilot-dev4-consent-backend " >> "$LAMBDA_FUNCTION_NAME"
+          fi
       - name: Deploy to Lambda
         # run: aws lambda update-function-code --function-name $LAMBDA_FUNCTION_NAME --zip-file fileb://updated_lambda_function.zip
         run: echo ''$LAMBDA_FUNCTION_NAME'
