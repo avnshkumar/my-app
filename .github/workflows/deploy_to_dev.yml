@@ -34,7 +34,7 @@ jobs:
         run: cat workflows/deploy_to_dev.yml
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
-        # with:
+        with:
         #   aws-access-key-id: ASIAU2SYT7GJTG7DO2NO
         #   aws-secret-access-key: egNYENtHQ9IlT5y2GNwMjpDy7jnmlxdwcpyVCHyN
           aws-region: ${{ env.AWS_REGION }}
