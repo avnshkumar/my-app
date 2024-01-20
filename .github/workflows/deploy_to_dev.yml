@@ -22,4 +22,5 @@ jobs:
       - name: Dump github events and other vars
         run: echo '${{ toJSON(github.event.inputs) }}' && echo '${{ toJSON(github.ref_name) }}' && echo '${{ toJSON(github.head_ref) }}'
         shell: bash
-      
+      - name: Display workflow file
+        run: cat .github/worflows/deploy_to_dev.yml
