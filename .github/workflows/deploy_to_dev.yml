@@ -35,8 +35,8 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ASIAU2SYT7GJTG7DO2NP
-          aws-secret-access-key: egNYENtHQ9IlT5y2GNwMjpDy7jnmlxdwcpyVCHyO
+          aws-access-key-id: ASIAU2SYT7GJTG7DO2NO
+          aws-secret-access-key: egNYENtHQ9IlT5y2GNwMjpDy7jnmlxdwcpyVCHyN
           aws-region: ${{ env.AWS_REGION }}
       - name: Check AWS version
         run: aws --version
