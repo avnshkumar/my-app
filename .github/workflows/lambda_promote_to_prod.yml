@@ -1,0 +1,32 @@
+name: Lambda promote to prod
+on:
+  workflow_dispatch:
+defaults:
+  run:
+    shell: bash
+
+env:
+  AWS_REGION: us-east-1
+  # LAMBDA_FUNCTION_NAME: ${{ env.ENV == 'dev' && 'dev-consent-backend' || env.ENV == 'dev1' && 'dev1-consent-backend' || env.ENV == 'dev2' && 'copilot-dev2-consent-backend' || env.ENV == 'dev3' && 'copilot-dev3-consent-backend' || env.ENV == 'dev4' && 'copilot-dev4-consent-backend' }}
+  LAMBDA_FUNCTION_NAME : "consent-backend"
+
+jobs:
+  hello:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Dump github events and other vars
+        run: echo '${{ toJSON(github.event.inputs) }}' && echo '${{ toJSON(github.ref_name) }}' && echo '${{ toJSON(github.head_ref) }}'
+      # - name: Configure AWS Credentials
+      #   uses: aws-actions/configure-aws-credentials@v2
+      #   with:
+      #   #   aws-access-key-id: ASIAU2SYT7GJTG7DO2NO
+      #   #   aws-secret-access-key: egNYENtHQ9IlT5y2GNwMjpDy7jnmlxdwcpyVCHyN
+      #     aws-region: ${{ env.AWS_REGION }}
+      - name: Check AWS version
+        run: aws --version
+      # - name: Zip Lambda Function
+      #   run: zip -r updated_lambda_function.zip node/consent-backend/*
+      - name: Deploy to Lambda
+        # run: aws lambda update-function-code --function-name $LAMBDA_FUNCTION_NAME --zip-file fileb://updated_lambda_function.zip
+        run: echo $LAMBDA_FUNCTION_NAME 123
