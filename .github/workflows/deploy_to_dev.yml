@@ -61,4 +61,4 @@ jobs:
           fi
       - name: Deploy to Lambda
         # run: aws lambda update-function-code --function-name $LAMBDA_FUNCTION_NAME --zip-file fileb://updated_lambda_function.zip
-        run: echo '$LAMBDA_FUNCTION_NAME'
+        run: echo '${LAMBDA_FUNCTION_NAME}'
