@@ -1,0 +1,281 @@
+name: Build and deploy dev
+run-name: ${{ github.actor }} is deploying on ${{ inputs.environment }} environment
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: "Select the environment"
+        type: string
+        required: true
+        default: "dev1"
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: Select the environment
+        required: true
+        default: dev1
+        options:
+          - dev1
+          - dev2
+          - dev3
+          - dev4
+env:
+  AWS_REGION: us-east-1
+concurrency:
+  group: ${{ github.event.inputs.environment }}-deployment
+  cancel-in-progress: false
+
+jobs:
+  lock:
+    uses: trywingman/deployment-config/.github/workflows/deployment_lock.yaml@master
+    with:
+      lock: true
+      unlock: false
+      environment: ${{ inputs.environment || 'dev' }}
+      project: "strings-frontend"
+    secrets: inherit
+  setup:
+    name: Setup
+    needs: [lock]
+    runs-on: ubuntu-latest
+    outputs:
+      app_id: ${{ steps.get-app-id.outputs.APP_ID }}
+      branch_name: ${{ steps.get-branch-name.outputs.branch_name }}
+      domain_name: ${{ steps.get-domain-name.outputs.domain_name }}
+      commit_id: ${{ github.sha }}
+    steps:
+      - name: Get appId for the environment
+        id: get-app-id
+        run: |
+          app_id=""
+          if [ "${{ inputs.environment }}" = "dev" ] || [ "${{ inputs.environment }}" = "" ]; then
+            app_id="dpz9elteul4ct"
+          elif [ "${{ inputs.environment }}" = "dev1" ]; then
+            app_id="dpz9elteul4ct"
+          elif [ "${{ inputs.environment }}" = "dev2" ]; then
+            app_id="d1jlpb6zuhcs85"
+          elif [ "${{ inputs.environment }}" = "dev3" ]; then
+            app_id="d2chy9nlela92e"
+          elif [ "${{ inputs.environment }}" = "dev4" ]; then
+            app_id="d1t2734vuam1af"
+          fi
+          echo "APP_ID=$app_id" >> $GITHUB_OUTPUT
+      - name: "Checking out code"
+        uses: actions/checkout@v3
+      - name: Get Branch Name
+        id: get-branch-name
+        run: |
+          github_ref="${{github.ref}}"
+          branch_name=${github_ref#refs/heads/}
+
+          if [ "$branch_name" = "master" ]; then
+            branch_name="master"
+          fi
+
+          echo "Branch name: $branch_name"
+          echo "branch_name=$branch_name" >> $GITHUB_OUTPUT
+          echo "Deploying branch: $branch_name" >> $GITHUB_STEP_SUMMARY
+      - name: Get Domain Name
+        id: get-domain-name
+        run: |
+          domain_name=""
+          if [ "${{ inputs.environment }}" = "dev" ] || [ "${{ inputs.environment }}" = "" ]; then
+            domain_name="dev.copilot.clari.com"
+          elif [ "${{ inputs.environment }}" = "dev1" ]; then
+            domain_name="dev1.copilot.clari.com"
+          elif [ "${{ inputs.environment }}" = "dev2" ]; then
+            domain_name="dev2.copilot.clari.com"
+          elif [ "${{ inputs.environment }}" = "dev3" ]; then
+            domain_name="dev3.copilot.clari.com"
+          elif [ "${{ inputs.environment }}" = "dev4" ]; then
+            domain_name="dev4.copilot.clari.com"
+          fi
+          echo "domain_name=$domain_name" >> $GITHUB_OUTPUT
+  amplify-create-build:
+    needs: [setup]
+    name: Amplify Create Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # if: ${{ needs.setup.outputs.check-pr-raise-to-master == 'false' && github.ref != 'refs/heads/master' }}
+    steps:
+      - name: Create build on amplify
+        uses: trywingman/amplify-status@main
+        with:
+          app-id: ${{ needs.setup.outputs.app_id }}
+          action: "create_build"
+          branch-name: ${{ needs.setup.outputs.branch_name }}
+          commit-id: ${{ needs.setup.outputs.commit_id }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ env.AWS_REGION }}
+      - name: Add summary to the workflow run
+        run: |
+          echo "Build created on ${{ needs.setup.outputs.domain_name }} with branch name ${{ needs.setup.outputs.branch_name }}" >> $GITHUB_STEP_SUMMARY
+  amplify-wait-for-build:
+    needs: [setup, amplify-create-build]
+    name: Amplify Wait for Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: ${{ !cancelled() }}
+    steps:
+      - name: Send deployment started message to Slack
+        id: slack
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "Deployment ran on: ${{ needs.setup.outputs.branch_name }}"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ">Status: In Progress :large_yellow_circle:\n>Environment: ${{ github.event.inputs.environment }}\n>Username: ${{ github.actor }}"
+                  }
+                },
+                {
+                  "type": "divider"
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View Workflow Run",
+                        "emoji": true
+                      },
+                      "url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: "https://hooks.slack.com/services/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"
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+      - name: Wait for Amplify to finish remote build
+        uses: trywingman/amplify-status@main
+        with:
+          app-id: ${{ needs.setup.outputs.app_id }}
+          action: "check_build_status"
+          branch-name: ${{ needs.setup.outputs.branch_name }}
+          commit-id: ${{ needs.setup.outputs.commit_id }}
+          wait: true
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ env.AWS_REGION }}
+      - name: Add summary to the workflow run
+        run: |
+          echo "Build completed on ${{ needs.setup.outputs.domain_name }} with branch name ${{ needs.setup.outputs.branch_name }}" >> $GITHUB_STEP_SUMMARY
+  amplify-branch-deploy:
+    needs: [setup, amplify-wait-for-build]
+    name: Amplify Branch Deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: ${{ !cancelled() }}
+    steps:
+      - name: Deploy branch on amplify
+        uses: trywingman/amplify-status@main
+        with:
+          app-id: ${{ needs.setup.outputs.app_id }}
+          action: "update_branch"
+          branch-name: ${{ needs.setup.outputs.branch_name }}
+          domain-name: ${{ needs.setup.outputs.domain_name }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ env.AWS_REGION }}
+      - name: Add summary to the workflow run
+        run: |
+          echo "Branch ${{ needs.setup.outputs.branch_name }} set for ${{ needs.setup.outputs.domain_name }}" >> $GITHUB_STEP_SUMMARY
+      - name: Updated deployment finished message to Slack
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "Deployment finished on: ${{ needs.setup.outputs.branch_name }}"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ">Status: Success :large_green_circle:"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: "https://hooks.slack.com/services/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"
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+  slack_notify:
+    needs: [setup, amplify-branch-deploy]
+    name: Slack Notification
+    runs-on: ubuntu-latest
+    if: ${{ failure() }}
+    steps:
+      - name: Send deployment failed message to Slack
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "Deployment failed on: ${{ needs.setup.outputs.branch_name }}"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ">Status: Failed :red_circle:"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "Environment: ${{ github.event.inputs.environment }}\nUsername: ${{ github.actor }}"
+                  }
+                },
+                {
+                  "type": "divider"
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View Workflow Run",
+                        "emoji": true
+                      },
+                      "url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: "https://hooks.slack.com/services/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"
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
