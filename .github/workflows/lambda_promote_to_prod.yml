@@ -30,6 +30,10 @@ jobs:
           zip --version
           pwd
           ls -al
+      - name: Zip File
+        run: |
+          zip -r text.zip .github/*
+          ls -al
         
       # - name: Zip Lambda Function
       #   run: zip -r updated_lambda_function.zip node/consent-backend/*
