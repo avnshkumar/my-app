@@ -25,6 +25,12 @@ jobs:
       #     aws-region: ${{ env.AWS_REGION }}
       - name: Check AWS version
         run: aws --version
+      - name: Zip
+        run: |
+          zip --version
+          pwd
+          ls -al
+        
       # - name: Zip Lambda Function
       #   run: zip -r updated_lambda_function.zip node/consent-backend/*
       - name: Deploy to Lambda
