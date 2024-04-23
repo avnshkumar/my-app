@@ -39,7 +39,7 @@ jobs:
         uses: mikefarah/yq@master
         id: read_yaml
         with:
-          cmd: yq eval '.shards[$shard_index].tests | .[]' .tests/shards_config.yml
+          cmd: yq eval '.shards[$shard_index].tests | .[]' tests/shards_config.yml
       - name: Run Playwright tests
         id: playwright_tests
         run: |
