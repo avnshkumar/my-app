@@ -1,0 +1,39 @@
+shards:
+  1:
+    tests:
+      - tests/api/share-calls/share-calls.spec.js
+      - tests/api/invite-users/inviteUser.spec.js
+      - tests/api/deals/deal-central-apis.spec.ts
+  2:
+    tests:
+      - tests/e2e/teamCalls/team-calls.spec.js
+  3:
+    tests:
+      - tests/e2e/upload-call/upload-call.spec.ts
+      - tests/e2e/myCalls/mycalls.spec.js
+  4:
+    tests:
+      - tests/e2e/auto-correct/auto-correct.spec.js
+  5:
+    tests:
+      - tests/e2e/Settings/workspace-setting.spec.js 
+      - tests/e2e/Settings/profile-setting.spec.js
+  6:
+    tests:
+      - tests/e2e/sandbox/workspace/headersection.spec.js
+      - tests/e2e/sandbox/workspace/ssoprovisioning.spec.js
+  7:
+    tests:
+      - tests/e2e/user-onboarding/invitedOrProvisioned/adminNonRecordingRoles.spec.ts
+      - tests/e2e/user-onboarding/invitedOrProvisioned/adminRecordingRoles.spec.ts
+  8:
+    tests:
+      - tests/e2e/call-review/verifyAddAttendees.spec.js
+      - tests/e2e/call-review/verifyCallPrivacy.spec.js
+      - tests/e2e/call-review/verifyCommentScope.spec.js
+  9:
+    tests:
+      - tests/e2e/battle-cards/battle-card-draft.spec.ts
+  10:
+    tests:
+      - tests/e2e/inviteUser/inviteUser.spec.js
