@@ -35,6 +35,7 @@ jobs:
         run: |
           yaml_content=$(< tests/shards_config.yml)
           echo "::set-output name=yamlContent::$yaml_content"
+          pwd
       - name: Read yaml
         uses: mikefarah/yq@master
         id: read_yaml
