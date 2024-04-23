@@ -25,32 +25,27 @@ jobs:
   setup:
     name: Setup
     runs-on: ubuntu-latest
-    outputs:
-      pull_request_number: ${{ steps.get-pr-number.outputs.PULL_REQUEST_NUMBER }}
-      app_id: ${{ steps.get-app-id.outputs.APP_ID }}
-      branch_name: ${{ steps.get-branch-name.outputs.BRANCH_NAME }}
-      browserstack_build_name: ${{ steps.get-build-name.outputs.BROWSERSTACK_BUILD_NAME }}
-      commit_id: ${{ steps.get-commit-id.outputs.COMMIT_ID }}
-      slack_webhook_url: ${{ steps.get-slack-webhook-url.outputs.SLACK_WEBHOOK_URL }}
     steps:
-      - name: Load and Parse YAML File
-        id: load_yaml
-        run: |
-          yaml_content=$(< tests/shard.yml)
-          echo "::set-output name=yamlContent::$yaml_content"
-      - name: Read yaml
-        uses: mikefarah/yq@master
-        id: read_yaml
-        with:
-          cmd: yq eval '.shards[$shard_index].tests | .[]' .tests/shards_config.yml
-      - name: Run Playwright tests
-        id: playwright_tests
-        run: |
-          shard_config=$(< tests/shard_config.yml)
-          shard_index=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-          shard_tests=${{steps.read_yaml.outputs.result}}
-          echo "Shard tests for shard $shard_index:"
-          echo "$shard_tests"
-          # Iterate over each test file and execute it
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+    - name: Load and Parse YAML File
+      id: load_yaml
+      run: |
+        yaml_content=$(< tests/shard.yml)
+        echo "::set-output name=yamlContent::$yaml_content"
+    - name: Read yaml
+      uses: mikefarah/yq@master
+      id: read_yaml
+      with:
+        cmd: yq eval '.shards[$shard_index].tests | .[]' .tests/shards_config.yml
+    - name: Run Playwright tests
+      id: playwright_tests
+      run: |
+        shard_config=$(< tests/shard_config.yml)
+        shard_index=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        shard_tests=${{steps.read_yaml.outputs.result}}
+        echo "Shard tests for shard $shard_index:"
+        echo "$shard_tests"
+        # Iterate over each test file and execute it
           
-            npx playwright test $shard_tests 
+          npx playwright test $shard_tests 
