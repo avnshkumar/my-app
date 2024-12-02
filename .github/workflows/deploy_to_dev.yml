@@ -43,12 +43,15 @@ jobs:
       #   #   aws-secret-access-key: egNYENtHQ9IlT5y2GNwMjpDy7jnmlxdwcpyVCHyN
       #     aws-region: ${{ env.AWS_REGION }}
       - name: Check AWS version
-        run: aws --version
+        run: |
+          aws --version
+          x='avinash'
 
       # - name: Zip Lambda Function
       #   run: zip -r updated_lambda_function.zip node/dev-consent-backend/*
       - name: Get Lambda function name
         run: |
+          echo $x
           if [[ "${{ github.event.inputs.environment }}" == "dev" ]]; then
             echo "LAMBDA_FUNCTION_NAME=dev-consent-backend" >> $GITHUB_ENV
           elif [[ "${{ github.event.inputs.environment }}" == "dev1" ]]; then
